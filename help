@@ -1,0 +1,206 @@
+import matplotlib.pyplot as plt  # l6,b1,x16,t7
+import csv
+
+
+def carregaDados():
+    arquivo = r"H:\baixados\arquivos csv\athlete_events.csv"
+    planilha = open(arquivo, 'r')
+    return list(csv.reader(planilha))
+
+
+def mostrarOpcoes():
+    print(
+        "Digite [1] para comparar o desempenho de um país no esporte escolhido, em um intervalo de anos escolhido e em qual temporada da Olimpíada")
+    print(
+        "Digite [2] para ver quantas medalhas, de um país selecionado, ganhou em um período de anos escolhido nas olimpíadas  e na temporada também selecionada")
+    print("Digite [3] para comparar o peso de atletas em  um evento nas olimpíadas em determinados período de anos ")
+    print("Digite [0] para parar do programa")
+    print("O gráfico de cada escolha será representado da melhor forma para visualização")
+    return int(input("Digite a opção selecionada: "))
+
+
+def lerDadosQuestao1():
+    pais = str(input("Qual País você gostaria de comparar o desempenho?: "))
+    esporte = str(input("E em qual esporte?: "))
+    print("Iremos analisar um intervalo de anos escolhido por você")
+    anoIni = str(input("De qual ano você gostaria de comparar?: "))
+    anoFim = str(input("Até o ano?: "))
+    temporada = str(input("Qual temporada(Winter ou Summer)?: "))
+    return pais, esporte, anoIni, anoFim, temporada
+
+
+def adicionamedalha(medalhasporano, ano):
+    if ano in medalhasporano:
+        medalhasporano[ano] += 1
+    else:
+        medalhasporano[ano] = 1
+
+
+def linha(dados):
+    # medalhasG ==> {2000:["Athletics 100 m...", "..."]}
+
+    medalhasG = {}
+    medalhasS = {}
+    medalhasB = {}
+    for atleta in range(1, len(dados)):
+        ano = int(dados[atleta][9])
+        if pais == dados[atleta][6] and \
+                esporte == dados[atleta][12] and \
+                temporada == dados[atleta][10] and \
+                anoIni <= ano <= anoFim:
+            if dados[atleta][14] == "Gold":
+                adicionamedalha(medalhasG, ano)
+            elif dados[atleta][14] == "Silver":
+                adicionamedalha(medalhasS, ano)
+            elif dados[atleta][14] == "Bronze":
+                adicionamedalha(medalhasB, ano)
+    return medalhasG, medalhasS, medalhasB
+
+
+def construirGraficoLinhas(goldmed, silvermed, bronzemed):
+    # Gold
+    golds = sorted(list(goldmed.items()))
+    anos = [a for a, n in golds]
+    quantidadesOuros = [n for a, n in golds]
+    plt.plot(anos, quantidadesOuros, color="gold", linestyle="-", linewidth=2)
+    plt.scatter(anos, quantidadesOuros, color="gold", label="Gold", marker="o")
+    # Silver
+    silvers = sorted(list(silvermed.items()))
+    quantidadesPratas = [n for a, n in silvers]
+    plt.plot(anos, quantidadesPratas, color="grey", linestyle="-", linewidth=2)
+    plt.scatter(anos, quantidadesPratas, color="grey", label="Silver", marker="o")
+    # Bronze
+    bronzes = sorted(list(bronzemed.items()))
+    quantidadesBronze = [n for a, n in bronzes]
+    plt.plot(anos, quantidadesBronze, color="saddlebrown", linestyle="-", linewidth=2)
+    plt.scatter(anos, quantidadesBronze, color="saddlebrown", label="Bronze", marker="o")
+    # Plotagem
+    plt.ylabel("Quantidade de medalhas")
+    plt.xlabel("Anos")
+    plt.title("Desempenho do País")
+    plt.legend()
+    plt.xticks(anos, anos)
+    plt.grid()
+    plt.show()
+
+
+def LerdadosQuestao2():
+    pais = str(input("Digite o nome do País que gostaria de analisar: "))
+    print("Serão retirados os ultimos anos.Ex: caso digite 3, analisaremos os últimos 3 anos das Olimpíadas")
+    anos = int(input("Digite um valor inteiro representando quantos anos você gostaria de analisar: "))
+    temporada = str(input("Qual temporada?(Winter ou Summer) "))
+    return pais, anos, temporada
+
+
+def UltimosAnos(anos):
+    anoFinal = 0
+    if temporada == "Summer":
+        anoInicial = 2016
+        for ano in range(anoInicial, anoInicial - anos * 4, -4):
+            anoFinal = ano
+    else:
+        anoInicial = 2014
+        for ano in range(anoInicial, anoInicial - anos * 4, -4):
+            anoFinal = ano
+    return anoInicial, anoFinal
+
+
+def Barras(dados, anoIni, anoFim):
+    medalhasGB = {}
+    medalhasSB = {}
+    medalhasBB = {}
+    for atleta in range(1, len(dados)):
+        ano = int(dados[atleta][9])
+        if pais == dados[atleta][6] and \
+                temporada == dados[atleta][10] and \
+                anoIni <= ano <= anoFim:
+            if dados[atleta][14] == "Gold":
+                adicionamedalha(medalhasGB, ano)
+            elif dados[atleta][14] == "Silver":
+                adicionamedalha(medalhasSB, ano)
+            elif dados[atleta][14] == "Bronze":
+                adicionamedalha(medalhasBB, ano)
+    return medalhasGB, medalhasSB, medalhasBB
+
+
+def construirGraficoBarras(goldMed, silverMed, bronzeMed):
+    # Gold
+    golds = sorted(list(goldMed.items()))
+    anos = [a for a, n in golds]
+    quantidadesOuros = [n for a, n in golds]
+    plt.bar(anos, quantidadesOuros, color="gold", align="edge", width=0.2, label="Gold")
+    # Silver
+    silvers = sorted(list(silverMed.items()))
+    quantidadesPratas = [n for a, n in silvers]
+    plt.bar(anos, quantidadesPratas, color="grey", align="edge", width=0.15, label="Silver")
+    # Bronze
+    bronzes = sorted(list(bronzeMed.items()))
+    quantidadesBronze = [n for a, n in bronzes]
+    plt.plot(anos, quantidadesBronze, color="saddlebrown", align="edge", width=0.1, label="Bronze")
+    # Plotagem
+    plt.title("Medalhas nos ultimos anos")
+    plt.ylabel("Quantidade de medalhas")
+    plt.xlabel("Anos")
+    plt.legend()
+    plt.grid()
+    plt.show()
+
+
+def LerDadosQuestao3():
+    evento = str(input("Digite o nome do evento: "))
+    print("Serão retirados os ultimos anos.Ex: caso digite 3, analisaremos os últimos 3 anos das Olimpíadas")
+    anos = int(input("Digite um valor inteiro representando quantos anos você gostaria de analisar: "))
+    temporada = str(input("Qual temporada você gostaria de comparar?(Winter ou Summer) "))
+    return evento, anos, temporada
+
+
+def ContarPesos(listapesos, listap, ano):
+    listapesos[ano].append(listap)
+
+
+def BOXPLOT(dados, anoIni, anoFinal):
+    listapesos = {}
+    for atleta in range(1, len(dados)):
+        ano = int(dados[atleta][9])
+        if evento == dados[atleta][13] and temporada == dados[atleta][10] and anoIni <= ano <= anoFim:
+            if dados[atleta][5] == "NA":
+                continue
+            else:
+                listap = int(dados[atleta][5])
+                ContarPesos(listapesos, listap, ano)
+    return listapesos
+
+
+def ConstruirGraficoBOX(listapesos):
+    plt.boxplot(listapesos, patch_artist=True, labels=anos)
+    plt.ylabel("pesos")
+    plt.xlabel("anos")
+    plt.title('Pesos dos/das atletas em %s' % evento)
+    plt.show()
+
+
+dados = carregaDados()
+opcao = mostrarOpcoes()
+while True:
+    if opcao == 0:
+        print("Programa Encerrado")
+        break
+    # Linha
+    elif opcao == 1:
+        pais, esporte, anoIni, anoFim, tempoorada = lerDadosQuestao1()
+        goldMed, silverMed, bronzeMed = linha(dados)
+        construirGraficoLinhas(goldMed, silverMed, bronzeMed)
+    # Barra
+    elif opcao == 2:
+        pais, anos, temporada = LerdadosQuestao2()
+        anoIni, anoFim = UltimosAnos(anos)
+        goldMed, silverMed, bronzeMed = Barras(dados, anoIni, anoFim)
+        construirGraficoBarras(goldMed, silverMed, bronzeMed)
+    # Boxplot
+    elif opcao == 3:
+        evento, anos, temporada = LerDadosQuestao3()
+        anoInicial, anoFinal = UltimosAnos(anos)
+        listapesos = BOXPLOT(anoInicial, anoFinal)
+        ConstruirGraficoBOX(listapesos)
+    else:
+        print("Este numero não é válido tente novamente")
